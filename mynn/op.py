@@ -136,19 +136,15 @@ class conv2D(Layer):
             X_padded = X
             input_grad_padded = np.zeros_like(X)
     
-        # 梯度reshape为适合矩阵乘法的形式
         grad_reshaped = grad.transpose(0, 2, 3, 1).reshape(-1, out_channels)    
 
-        # 计算权重梯度
         cols = im2col(X_padded, self.kernel_size, self.stride)
         self.grads['W'] = np.dot(grad_reshaped.T, cols).reshape(self.W.shape)
         self.grads['b'] = np.sum(grad_reshaped, axis=0)
 
-        # 计算输入梯度
         W_reshaped = self.W.reshape(out_channels, -1)
         input_cols = np.dot(grad_reshaped, W_reshaped)
     
-        # 需要实现col2im将列矩阵转回图像格式
         input_grad = col2im(input_cols, X_padded.shape, self.kernel_size, self.stride)
     
         if self.padding > 0:
